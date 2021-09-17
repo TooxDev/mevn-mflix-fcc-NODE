@@ -92,8 +92,16 @@ router.post(
         .status(400)
         .json({ error: "Could not find user with this email" });
 
-    if (!compare(password, foundUser.password))
-      return res.status(400).json({ error: "Not valid Password" });
+    let passwordOk;
+    try {
+      passwordOk = await compare(password, foundUser.password);
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ error: "Could not check password validity" });
+    }
+
+    if (!passwordOk) return res.status(400).json({ error: "Auth error" });
 
     let token;
     try {
